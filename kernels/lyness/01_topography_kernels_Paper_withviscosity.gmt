@@ -1,0 +1,219 @@
+#!/bin/bash
+
+# script to plot power spectrums of the dynamic topo models and our data
+# use on sagitta
+
+source ~/.bashrc
+
+
+# -------------------------------------
+# --------- SET GMT DEFAULTS ----------
+# -------------------------------------
+
+gmt gmtset FONT_ANNOT_PRIMARY=8p 
+gmt gmtset FONT_ANNOT_SECONDARY=8p 
+gmt gmtset FONT_LABEL=8p 
+gmt gmtset MAP_FRAME_PEN=0.5p  
+gmt gmtset MAP_TICK_PEN_PRIMARY=0.5p 
+gmt gmtset MAP_TICK_PEN_SECONDARY=0.5p 
+gmt gmtset MAP_TICK_LENGTH=0.1c 
+gmt gmtset MAP_ANNOT_OFFSET_PRIMARY=0.1c 
+gmt gmtset MAP_ANNOT_OFFSET_SECONDARY=0.1c 
+gmt gmtset MAP_LABEL_OFFSET=0.1c
+
+# -------------------------------------
+# --------- SPECIFY PARAMETERS --------
+# -------------------------------------
+
+
+
+line_thickness="1p"
+
+label_size="10"
+
+rgn="-R0/31/0.01/10"
+#rgn="-R0/31/0/3"
+
+proj="-JX10/6l"
+proj_labels="-JX10/6"
+
+
+# -------------------------------------
+# --------- SUBROUTINES ---------------
+# -------------------------------------
+
+cartoon () {
+
+# D" layer
+
+echo -e "0 2900\n1 2900\n1 2700\n0 2700" | gmt psxy $rgn_cartoon $proj -G190 -O -K >> $psfile
+echo -e "1 2700\n0 2700" | gmt psxy $rgn_cartoon $proj -W1p,0,1_1:0 -O -K >> $psfile
+
+# Lower mantle
+
+echo -e "0 670\n1 670\n1 2700\n0 2700" | gmt psxy $rgn_cartoon $proj -G220 -O -K >> $psfile
+echo -e "1 670\n0 670" | gmt psxy $rgn_cartoon $proj -W1p,0,3_2:0 -O -K >> $psfile
+
+# Transition Zone
+
+echo -e "0 670\n1 670\n1 410\n0 410" | gmt psxy $rgn_cartoon $proj -G170 -O -K >> $psfile
+echo -e "1 410\n0 410" | gmt psxy $rgn_cartoon $proj -W1p,0,1_1:0 -O -K >> $psfile
+
+# Upper Mantle
+
+echo -e "0 100\n1 100\n1 410\n0 410" | gmt psxy $rgn_cartoon $proj -G200 -O -K >> $psfile
+echo -e "1 100\n0 100" | gmt psxy $rgn_cartoon $proj -W1p,0,3_2:0 -O -K >> $psfile
+
+# Lithosphere
+
+echo -e "0 100\n1 100\n1 0\n0 0" | gmt psxy $rgn_cartoon $proj -G128 -O -K >> $psfile
+
+# labels
+
+echo "0.5 2800 8 0 0 MC D\" Layer" | gmt pstext $rgn_cartoon $proj -O -K >> $psfile
+echo "0.5 1685 8 0 0 MC Lower Mantle" | gmt pstext $rgn_cartoon $proj -O -K >> $psfile
+echo "0.5 540 8 0 0 MC Transition Zone" | gmt pstext $rgn_cartoon $proj -O -K >> $psfile
+echo "0.5 255 8 0 0 MC Upper Mantle" | gmt pstext $rgn_cartoon $proj -O -K >> $psfile
+
+gmt psbasemap $rgn_cartoon $proj -Ba0/a1000f500:"Depth, km":Wesn -O -K >> $psfile
+
+}
+
+
+topo_kernel () {
+
+rgn_tkernel="-R0/1/3480/6370"
+proj="-JX3/6"
+
+gmt psbasemap $rgn_tkernel $proj -Ba0 -X$step -O -K >> $psfile 
+# divide by min to normalise the result
+min="-0.00043"
+rgn_tkernel="-R0/1/3480/6370"
+awk '{print $2/'$min', $1}' OUTPUT_${viscosity_profile}/KERNELS/surftopo010 | gmt psxy $rgn_tkernel $proj -W1p,red -O -K >> $psfile
+awk '{print $2/'$min', $1}' OUTPUT_${viscosity_profile}/KERNELS/surftopo020 | gmt psxy $rgn_tkernel $proj -W1p,red -O -K >> $psfile
+awk '{print $2/'$min', $1}' OUTPUT_${viscosity_profile}/KERNELS/surftopo030 | gmt psxy $rgn_tkernel $proj -W1p,red -O -K >> $psfile
+rgn_tkernel="-R0/1/0/2900"
+gmt psbasemap $rgn_tkernel $proj -Ba1f0.25:"Topography Kernel, A@+@~\151@~@+":/a1000f500ewSn -O -K >> $psfile
+proj="-JX3/-6"
+rgn_tkernel="-R0/1/0/2900"
+awk '{print $2, $1/1000}' /space/mch74/gmt/RESIDUAL_DEPTH_SH/02_figures/SH_power_spectra_analytical/output/exp_l=10_const=1.0.txt | gmt psxy $rgn_tkernel $proj -W1p,blue,-- -O -K >> $psfile
+awk '{print $2, $1/1000}' /space/mch74/gmt/RESIDUAL_DEPTH_SH/02_figures/SH_power_spectra_analytical/output/exp_l=20_const=1.0.txt | gmt psxy $rgn_tkernel $proj -W1p,blue,-- -O -K >> $psfile
+awk '{print $2, $1/1000}' /space/mch74/gmt/RESIDUAL_DEPTH_SH/02_figures/SH_power_spectra_analytical/output/exp_l=30_const=1.0.txt | gmt psxy $rgn_tkernel $proj -W1p,blue,-- -O -K >> $psfile
+}
+
+
+
+
+viscosity () {
+
+# prep viscosity profile
+paste VISC_INPUTS/${viscosity_profile}.vis kernel_data/viscosity/depth.final > VISC_INPUTS/${viscosity_profile}_2.vis
+
+if [ $viscosity_scale == "scaled" ] ; then
+
+	rgn_visc="-R19/24/1/2900"
+	proj="-JX3/-6"
+	gmt psxy VISC_INPUTS_PLOT/${viscosity_profile}_digitised.dat $rgn_visc $proj -W0.5p,red -X$step -O -K >> $psfile
+	gmt psbasemap $rgn_visc $proj -Ba1:"log@-10@-\(Viscosity, Pa s\)":/a1000f500ewSn -O -K >> $psfile
+
+elif [ $viscosity_scale == "unscaled" ] ; then
+
+	rgn_visc="-R0.1/10000/1/2900"
+	proj="-JX3l/-6"
+	gmt psxy VISC_INPUTS/${viscosity_profile}_2.vis $rgn_visc $proj -W0.5p,red -X$step -O -K >> $psfile
+	gmt psbasemap $rgn_visc $proj -Ba1pf0:"Viscosity ratio":/a1000f500ewSn -O -K >> $psfile
+	proj="-JX3/-6"
+
+fi
+
+}
+
+# -------------------------------------
+# --------- PLOT ----------------------
+# -------------------------------------
+
+
+subroutine () {
+
+step="3.5"	# horizontal origin shift
+
+proj="-JX3/-6"
+
+rgn_cartoon="-R0/1/0/2900"
+rgn_gkernel="-R-0.5/0.5/0/2900"
+rgn_tkernel="-R0/1/0/2900"
+rgn_visc="-R0/600/0/2900"
+#rgn_visc="-R20/24/0/2900"
+rgn_dens="-R0/8/0/2900"
+rgn_s40rts_amplitude="-R0/2.5/0/2900"
+rgn_s40rts_power="-R0/30/0/2900"
+
+# plot begin
+
+	gmt psbasemap $rgn_tkernel $proj -Ba0 -K > $psfile
+
+# cartoon
+echo "Plot 1 - Cartoon"
+	cartoon
+	echo "0.92 2800 10 0 0 BR a" | gmt pstext $rgn_tkernel $proj -N -W0.02p -TO -Gwhite -O -K >> $psfile
+
+# viscosity profile
+echo "Plot 2 - Viscosity Profile"
+	viscosity
+
+# geoid kernels
+#echo "Plot 3"
+#	geoid_kernel
+#	echo "0.92 2800 10 0 0 BR c" | gmt pstext $rgn_tkernel $proj -N -W0.02p -O -K >> $psfile
+
+# topography kernels
+echo "Plot 4 - Topography Kernel"
+	topo_kernel
+	
+
+gmt psbasemap $rgn_tkernel $proj -Ba0 -O >> $psfile
+
+
+# -------------------------------------
+# --------- CONVERT TO JPG ------------
+# -------------------------------------
+
+echo "---------"
+echo "convert to jpg"
+echo "---------"
+
+jpgfile=$(echo $psfile | sed s/"\.ps"/"\.jpg"/)
+gmt psconvert -Tj -A+m0.05c -P -E300 -Z $psfile
+
+}
+
+# -------------------------------------
+# --------- EXECUTE -------------------
+# -------------------------------------
+
+for viscosity_profile in C95 F10a F10b FM96 FP91 H85 KM92 Lau2016 MF04a MF04b MF97 R15_H3 R93 RW91 L96 L98 S10 KL00a KL00b KL00c; do
+	viscosity_scale="unscaled"
+	echo "plotting viscosity profile for $viscosity_profile"
+	psfile="PLOTS/unscaled/TEST_${viscosity_profile}_unscaled.ps"
+	subroutine
+done
+
+# note these 'scaled' versions are digitized from the KL00 paper. 
+for viscosity_profile in L96 L98 S10 KL00a KL00b KL00c ; do
+	viscosity_scale="scaled"
+	echo "plotting viscosity profile for $viscosity_profile"
+	psfile="PLOTS/scaled/TEST_${viscosity_profile}_scaled.ps"
+	subroutine
+done
+
+
+# -------------------------------------
+# --------- CLEANUP -------------------
+# -------------------------------------
+
+echo "---------"
+echo "cleanup"
+echo "---------"
+
+rm gmt.conf
+rm gmt.history
