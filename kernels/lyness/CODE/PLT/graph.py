@@ -13,7 +13,7 @@ class Graph:
             - gravity/dynamic surface topography: admittance
     """
 
-    def __init__(self, graph_type, x_data, y_data, title=None):
+    def __init__(self, graph_type, x_data, y_data, degree, title=None):
 
         self.graph_type = graph_type
         self.ylabel = 'Radius (km)'
@@ -34,7 +34,7 @@ class Graph:
         self.fig, self.ax = plt.subplots()
         self.x = x_data
         self.y = y_data
-
+        self.degree = degree
         self.ax.set_xlabel(self.xlabel)
         self.ax.set_ylabel(self.ylabel)
         self.ax.set_title(title)
