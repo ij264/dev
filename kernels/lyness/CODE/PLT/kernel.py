@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-class Graph:
+class Kernel:
     """
     Functionality:
         - Take in a parameter which specifies whether to plot:
