@@ -89,7 +89,7 @@
    !------ FOR A TWO LAYER MODEL WITH MANY CALCULATIONS -
    !> minimum viscosity in the asthenosphere [Pa.s]
    real(qp),      parameter :: visc_lith = 1e23;
-   !> thickness of the lithosphere [m]
+   !> thikness of the lithosphere [m]
    real(qp),      parameter :: thck_lith = 70e3;
    !> minimum viscosity in the asthenosphere [Pa.s] 
    real(qp),      parameter :: min_visc_asth = 1e18;

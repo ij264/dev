@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # viscosity_depth_input = "(1, 6370), (10, 5000), (100, 3400)"
 
 # TODO
@@ -76,4 +77,4 @@ def viscosity_interpolate(viscosities, depths, root, filename):
 
 viscosity_depth_input = input("Enter viscosity points in the form (viscosity, depth) separated by commas: ")
 viscosities, depths = get_viscosities_and_depths(viscosity_depth_input)
-viscosity_interpolate(viscosities, depths, root='proto_visc/', filename='const_visc.vis')
+viscosity_interpolate(viscosities, depths, root='proto_visc/', filename='colli.vis')

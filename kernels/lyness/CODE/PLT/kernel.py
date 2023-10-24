@@ -1,8 +1,59 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-import scipy.interpolate
 from matplotlib.colors import LinearSegmentedColormap
+
+
+def get_viscosity(filepath: str):
+    with open(filepath, "r") as file:
+        # Initialize empty lists to store the data
+
+        # Read and process each line
+        visc_data = [float(line) for line in file]
+    # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
+    return np.flip(np.array(visc_data))
+
+
+def save_arr(arr, file_name):
+    # Saves kernels to text file
+    np.savetxt(file_name, arr, delimiter=',')
+
+
+def leading_zeros(degree):
+    return str(degree).zfill(3)
+
+
+def find_file_path(dir_to_find, root, degree, graph_type):
+    file_name = graph_type + leading_zeros(degree)
+    for path, dirs, files in os.walk(root):
+        if dir_to_find in dirs:
+            return os.path.join(path, dir_to_find + '/KERNELS/' + file_name)
+
+
+def parse_file(path, number_of_columns=2):
+
+    with open(path, "r") as file:
+        # Initialize empty lists to store the data
+        radial_data = []
+        kernel_data = []
+
+        # Read and process each line
+        for line in file:
+            # Split the line into columns using space as the delimiter
+            columns = line.strip().split()
+
+            # Check if there are two columns
+            if len(columns) == 2:
+                try:
+                    # Convert the values to floats and append to respective lists
+                    radial_data.append(float(columns[0]))
+                    kernel_data.append(float(columns[1]))
+                except ValueError:
+                    print("Error: Invalid data format on line:", line)
+            else:
+                print("Error: Invalid data format on line:", line)
+    # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
+    return np.array(radial_data), np.flip(np.array(kernel_data))
 
 
 class Kernel:
@@ -32,72 +83,62 @@ class Kernel:
             raise ValueError(f'Invalid graph type. Please choose from the following: {self.graph_types_dict.keys()}')
 
         self.graph_types = graph_types
+        if degrees == 'all':
+            self.degrees = np.arange(1, 31)
+        elif isinstance(degrees, (list, tuple, np.ndarray)):
+            self.degrees = degrees
 
-        # try:
-        #     if self.graph_type == 'surftopo':
-        #         self.xlabel = 'Dynamic Surface Topography Kernel'
-        #     elif self.graph_type == 'cmbtopo':
-        #         self.xlabel = 'Dynamic CMB Topography Kernel'
-        #     elif self.graph_type == 'geoid':
-        #         self.xlabel = 'Geoid'
-        #     elif self.graph_type == 'gravity':
-        #         self.xlabel = 'Free-air Gravity Anomaly Kernel'
-        #     elif self.graph_type == 'surfvel':
-        #         self.xlabel = 'Surface Plate Velocity Kernel'
-        #     elif self.graph_type == 'admittance':
-        #         self.xlabel = 'Gravity/Dynamic Surface Topography Kernel'
-        # except NameError:
-        #     print(graph_type, 'is not a valid kernel here.')
-        self.visc_profile = self.parse_file(root + 'INPUT/visc_profile.txt')[1]
-        self.degrees = degrees
+        if not all(degree in self.degrees for degree in self.degrees):
+            raise ValueError(f'Only degrees 1 - 30 are supported currently.')
+
         self.radial_data_length = 257
         self.target_dir = target_dir
         self.title = title
-        self.fig, self.axes = plt.subplots(1, len(self.graph_types), figsize=(10, 10))
+        self.fig, self.axes = plt.subplots(1, len(self.graph_types) + 1, figsize=(int(10 * len(self.graph_types)), 10))
         self.kernels = np.zeros((len(self.graph_types), self.radial_data_length, len(self.degrees)))
         self.root = root
         self.kernels_to_2d_numpy_array()
+        self.viscosity = get_viscosity(os.path.join(root + 'VISC_INPUTS/', 'colli.vis'))
 
     def kernels_to_2d_numpy_array(self):
         for i, graph_type in enumerate(self.graph_types):
             for j, degree in enumerate(self.degrees):
-                path = self.find_file_path(self.target_dir, self.root, degree, graph_type)
-                self.radial_data, self.kernel_data = self.parse_file(path)
+                path = find_file_path(self.target_dir, self.root, degree, graph_type)
+                self.radial_data, self.kernel_data = parse_file(path)
+                self.kernel_data = self.kernel_data
                 self.kernels[i, :, j] = self.kernel_data
-        # Return the kernel data as a 2D numpy array of size (degrees, radial_data)
-        # self.kernels = np.transpose(np.array(self.kernels))
-        # self.kernels = np.flip(self.kernels, axis=0)
 
-    def plot(self, style='line', marker_size=5):
-        # Initialise figure and axes
-        # print self.degrees
+    def admittance(self):
+        pass
+
+    def plot(self):
+        fig, axis = plt.subplots(figsize=(10, 10))
         for i, degree in enumerate(self.degrees):
-            if style == 'line':
-                self.ax.plot(self.kernels[:, i], self.radial_data, label=f'l = {degree}')
-            elif style == 'scatter':
-                self.ax.scatter(self.kernels[:, i], self.radial_data, label=f'l = {degree}', s=marker_size)
-        self.ax.xaxis.tick_top()
-        self.ax.xaxis.set_label_position('top')
-        self.graph_type = self.graph_type
-        self.ylabel = 'Radius (km)'
-
-        self.ax.set_xlabel(self.xlabel)
-        self.ax.set_ylabel(self.ylabel)
-        self.ax.set_title(self.title)
-        self.ax.legend()
+            plt.plot(self.kernels[0, :, i], self.radial_data, label=f'l = {degree}')
+        axis.xaxis.tick_top()
+        axis.xaxis.set_label_position('top')
+        axis.set_xlabel(self.graph_types[0])
+        axis.set_ylabel('Radius (km)')
+        axis.legend()
         plt.show()
 
     def imshow(self):
+        self.axes[0].plot(self.viscosity, self.radial_data, color='black')
+        self.axes[0].set_xscale('log')
+        self.axes[0].set_xlabel('$\mu \,\, (Pa \, s)$')
+        self.axes[0].set_ylabel('Radius (km)')
+        self.axes[0].set_ylim(self.radial_data.min(), self.radial_data.max())
         cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white', 'red'], N=256)
         for i, graph_type in enumerate(self.graph_types):
-
             # cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white'], N=256)
-            im = self.axes[i].imshow(self.kernels[i, :, :], extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
-                                                      np.max(self.radial_data), ], aspect='auto', cmap=cmap)
-            cbar = self.fig.colorbar(im, ax=self.axes[i], shrink=0.7)
-            self.axes[i].set_xlabel('Degree')
-            self.axes[i].set_ylabel('Radius (km)')
-            self.axes[i].set_title(self.title)
+            im = self.axes[i + 1].imshow(self.kernels[i, :, :],
+                                         extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
+                                                 np.max(self.radial_data)], aspect='auto', cmap=cmap)
+            self.axes[i].set_ylim(self.radial_data.min(), self.radial_data.max())
+            cbar = self.fig.colorbar(im, ax=self.axes[i + 1], shrink=0.7)
+            self.axes[i + 1].set_xlabel('Degree')
+            self.axes[i + 1].set_ylabel('Radius (km)')
+            self.axes[i + 1].set_title(self.graph_types[i])
         plt.tight_layout()
         plt.show()
 
@@ -124,44 +165,3 @@ class Kernel:
         self.ax.set_ylabel('Radius (km)')
         self.ax.set_title(self.title)
         plt.show()
-
-    def save(self, arr, file_name):
-        # Saves kernels to text file
-        np.savetxt(file_name, arr, delimiter=',')
-
-    def show(self):
-        pass
-
-    def leading_zeros(self, degree):
-        return str(degree).zfill(3)
-
-    def find_file_path(self, dir_to_find, root, degree, graph_type):
-        file_name = graph_type + self.leading_zeros(degree)
-        for path, dirs, files in os.walk(root):
-            if dir_to_find in dirs:
-                return os.path.join(path, dir_to_find + '/KERNELS/' + file_name)
-
-    def parse_file(self, path):
-
-        with open(path, "r") as file:
-            # Initialize empty lists to store the data
-            radial_data = []
-            kernel_data = []
-
-            # Read and process each line
-            for line in file:
-                # Split the line into columns using space as the delimiter
-                columns = line.strip().split()
-
-                # Check if there are two columns
-                if len(columns) == 2:
-                    try:
-                        # Convert the values to floats and append to respective lists
-                        radial_data.append(float(columns[0]))
-                        kernel_data.append(float(columns[1]))
-                    except ValueError:
-                        print("Error: Invalid data format on line:", line)
-                else:
-                    print("Error: Invalid data format on line:", line)
-        # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
-        return np.array(radial_data), np.array(kernel_data)
