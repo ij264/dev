@@ -152,8 +152,6 @@ class Kernel:
         im = self.ax.imshow(self.kernels, cmap='red', extent=[0, 30, 0, 258], aspect='auto')
         CS = self.ax.contour(X, Y, self.kernels)
         self.ax.clabel(CS, inline=True, fontsize=10)
-        # Add a colorbar for reference
-        # plt.colorbar()
 
         plt.xlabel('X Axis')
         plt.ylabel('Y Axis')
