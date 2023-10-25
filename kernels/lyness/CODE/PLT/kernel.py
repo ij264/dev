@@ -110,7 +110,7 @@ class Kernel:
                 kernels[i, :, j] = kernel_data
         return radial_data, kernels
 
-    def admittance(self):
+    def manual_admittance(self):
         kernels = np.zeros((2, self.radial_data_length, len(self.degrees)))
         _, gravity_and_surftopo = self.kernels_to_2d_numpy_array(kernels, graph_types=['gravity', 'surftopo'],
                                                                  degrees=self.degrees)
@@ -131,7 +131,7 @@ class Kernel:
         axis.legend()
         plt.show()
 
-    def imshow_kernel(self, kernels, normalise=True, show_viscosity=True):
+    def imshow(self, kernels, normalise=True, show_viscosity=True):
         if kernels.ndim == 2:
             kernels = np.expand_dims(kernels, axis=0)
 
@@ -157,11 +157,14 @@ class Kernel:
                 break
             else:
                 if normalise:
-                    vmin = np.min(kernels[i-1, :, :])
-                    vmax = np.max(kernels[i-1, :, :])
-                    norm = Normalize(vmin, vmax)
+                    vmin = 0
+                    vmax = 1
+
                 else:
-                    norm = None
+                    vmin = np.min(kernels[i - 1, :, :])
+                    vmax = np.max(kernels[i - 1, :, :])
+
+                norm = Normalize(vmin, vmax)
 
                 im = ax.imshow(kernels[i-1, :, :],
                                extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
@@ -173,6 +176,12 @@ class Kernel:
                 ax.set_ylabel('Radius (km)')
         plt.tight_layout()
         plt.show()
+
+    def surface_admittance(self):
+        admittance = np.zeros((1, 257, 30))
+        _, admittance = self.kernels_to_2d_numpy_array(admittance, ['admittance'], [i for i in range(1, 31)])
+        return admittance[0, 0, :]
+
 
     def contour(self):
 
