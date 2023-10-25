@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import Normalize
 
 
 def get_viscosity(filepath: str):
@@ -31,7 +32,6 @@ def find_file_path(dir_to_find, root, degree, graph_type):
 
 
 def parse_file(path, number_of_columns=2):
-
     with open(path, "r") as file:
         # Initialize empty lists to store the data
         radial_data = []
@@ -94,27 +94,36 @@ class Kernel:
         self.radial_data_length = 257
         self.target_dir = target_dir
         self.title = title
-        self.fig, self.axes = plt.subplots(1, len(self.graph_types) + 1, figsize=(int(10 * len(self.graph_types)), 10))
+
+        self.fig, self.axes = plt.subplots(1, len(self.graph_types) + 1, figsize=(int(8 * len(self.graph_types)), 10))
+        self.cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white', 'red'], N=256)
         self.kernels = np.zeros((len(self.graph_types), self.radial_data_length, len(self.degrees)))
         self.root = root
-        self.kernels_to_2d_numpy_array()
-        self.viscosity = get_viscosity(os.path.join(root + 'VISC_INPUTS/', 'colli.vis'))
+        self.radial_data, self.kernels = self.kernels_to_2d_numpy_array(self.kernels, self.graph_types, self.degrees)
+        self.viscosity = get_viscosity(os.path.join(root + 'VISC_INPUTS/', 'colli_box.vis'))
 
-    def kernels_to_2d_numpy_array(self):
-        for i, graph_type in enumerate(self.graph_types):
-            for j, degree in enumerate(self.degrees):
+    def kernels_to_2d_numpy_array(self, kernels, graph_types, degrees):
+        for i, graph_type in enumerate(graph_types):
+            for j, degree in enumerate(degrees):
                 path = find_file_path(self.target_dir, self.root, degree, graph_type)
-                self.radial_data, self.kernel_data = parse_file(path)
-                self.kernel_data = self.kernel_data
-                self.kernels[i, :, j] = self.kernel_data
+                radial_data, kernel_data = parse_file(path)
+                kernels[i, :, j] = kernel_data
+        return radial_data, kernels
 
     def admittance(self):
-        pass
+        kernels = np.zeros((2, self.radial_data_length, len(self.degrees)))
+        _, gravity_and_surftopo = self.kernels_to_2d_numpy_array(kernels, graph_types=['gravity', 'surftopo'],
+                                                                 degrees=self.degrees)
+        gravity_kernel = gravity_and_surftopo[0, :, :]
+        surftopo_kernel = gravity_and_surftopo[1, :, :]
+        admittance_kernel = gravity_kernel / surftopo_kernel
+        fig, ax = plt.subplots(figsize=(8, 8))
+        return admittance_kernel
 
     def plot(self):
-        fig, axis = plt.subplots(figsize=(10, 10))
+        fig, axis = plt.subplots(figsize=(8, 10))
         for i, degree in enumerate(self.degrees):
-            plt.plot(self.kernels[0, :, i], self.radial_data, label=f'l = {degree}')
+            plt.plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}')
         axis.xaxis.tick_top()
         axis.xaxis.set_label_position('top')
         axis.set_xlabel(self.graph_types[0])
@@ -122,23 +131,46 @@ class Kernel:
         axis.legend()
         plt.show()
 
-    def imshow(self):
-        self.axes[0].plot(self.viscosity, self.radial_data, color='black')
-        self.axes[0].set_xscale('log')
-        self.axes[0].set_xlabel('$\mu \,\, (Pa \, s)$')
-        self.axes[0].set_ylabel('Radius (km)')
-        self.axes[0].set_ylim(self.radial_data.min(), self.radial_data.max())
-        cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white', 'red'], N=256)
-        for i, graph_type in enumerate(self.graph_types):
-            # cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white'], N=256)
-            im = self.axes[i + 1].imshow(self.kernels[i, :, :],
-                                         extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
-                                                 np.max(self.radial_data)], aspect='auto', cmap=cmap)
-            self.axes[i].set_ylim(self.radial_data.min(), self.radial_data.max())
-            cbar = self.fig.colorbar(im, ax=self.axes[i + 1], shrink=0.7)
-            self.axes[i + 1].set_xlabel('Degree')
-            self.axes[i + 1].set_ylabel('Radius (km)')
-            self.axes[i + 1].set_title(self.graph_types[i])
+    def imshow_kernel(self, kernels, normalise=True, show_viscosity=True):
+        if kernels.ndim == 2:
+            kernels = np.expand_dims(kernels, axis=0)
+
+        number_of_subplots = kernels.shape[0]
+        if show_viscosity:
+            number_of_subplots += 1
+        columns = int(np.ceil(np.sqrt(number_of_subplots)))
+        rows = int(np.ceil(number_of_subplots / columns))
+        fig, axes = plt.subplots(rows, columns, figsize=(8, 10), squeeze=0)
+
+        for i, ax in enumerate(fig.axes):
+            if i > number_of_subplots - 1:
+                ax.set_visible(False)
+
+        for i, ax in enumerate(fig.axes):
+            if i == 0 and show_viscosity:
+                ax.plot(self.viscosity, self.radial_data, color='black')
+                ax.set_xscale('log')
+                ax.set_xlabel('$\mu \,\, (Pa \, s)$')
+                ax.set_ylabel('Radius (km)')
+                ax.set_ylim(self.radial_data.min(), self.radial_data.max())
+            elif i > number_of_subplots - 1:
+                break
+            else:
+                if normalise:
+                    vmin = np.min(kernels[i-1, :, :])
+                    vmax = np.max(kernels[i-1, :, :])
+                    norm = Normalize(vmin, vmax)
+                else:
+                    norm = None
+
+                im = ax.imshow(kernels[i-1, :, :],
+                               extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
+                                       np.max(self.radial_data)], aspect='auto', cmap='seismic', norm=norm)
+                ax.set_ylim(self.radial_data.min(), self.radial_data.max())
+                cbar = self.fig.colorbar(im, ax=ax, shrink=0.7)
+                ax.set_xlabel('Degree')
+                ax.set_title(self.graph_types[i-1])
+                ax.set_ylabel('Radius (km)')
         plt.tight_layout()
         plt.show()
 

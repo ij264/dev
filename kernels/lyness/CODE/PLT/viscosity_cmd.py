@@ -77,4 +77,4 @@ def viscosity_interpolate(viscosities, depths, root, filename):
 
 viscosity_depth_input = input("Enter viscosity points in the form (viscosity, depth) separated by commas: ")
 viscosities, depths = get_viscosities_and_depths(viscosity_depth_input)
-viscosity_interpolate(viscosities, depths, root='proto_visc/', filename='colli.vis')
+viscosity_interpolate(viscosities, depths, root='proto_visc/', filename='colli_box.vis')
