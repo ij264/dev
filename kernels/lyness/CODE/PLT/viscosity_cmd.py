@@ -31,7 +31,7 @@ def get_viscosities_and_depths(viscosity_depth_string: str):
 
 def viscosity_interpolate(viscosities, depths, root, filename):
     """
-    Linear interpolation for viscosity and depth given points
+    Linear interpolation for viscosity and depth given points.
 
     Writes a .vis file with the interpolated viscosities.
 
@@ -47,7 +47,7 @@ def viscosity_interpolate(viscosities, depths, root, filename):
     Returns: None
 
     Raises: ValueError
-            If the start and end depths are not 6370 km and 3400 km respectively.
+            If the start and end depths are not 6370 km and 3480 km respectively.
     """
 
     if depths[-1] < depths[0]:
@@ -55,7 +55,7 @@ def viscosity_interpolate(viscosities, depths, root, filename):
         viscosities = np.flip(viscosities)
 
     # Ensure the start and end depths are within the range of provided data.
-    if depths[0] != 3400 or depths[-1] != 6370:
+    if depths[0] != 3480 or depths[-1] != 6370:
         raise ValueError("Start and end depths must be 6370 km and 3400 km respectively.")
 
     cmb_depth = depths[0]
@@ -76,5 +76,6 @@ def viscosity_interpolate(viscosities, depths, root, filename):
 
 
 viscosity_depth_input = input("Enter viscosity points in the form (viscosity, depth) separated by commas: ")
+filename = input("Enter filename: ")
 viscosities, depths = get_viscosities_and_depths(viscosity_depth_input)
-viscosity_interpolate(viscosities, depths, root='proto_visc/', filename='colli_box.vis')
+viscosity_interpolate(viscosities, depths, root='proto_visc/', filename=filename)
