@@ -16,7 +16,7 @@ make clean
 
 To execute code, run:ma
 
-./MAKE_KERNELS [OUTPUT] [VISC_PROFILE]
+./MAKE_KERNEL [OUTPUT] [VISC_PROFILE]
 
 where [OUTPUT] is the output folder you want the kernels to be saved to (e.g. './OUTPUT_F10V1/') and 
 [VISC_PROFILE] is a viscosity profile (e.g. 'VISC_INPUTS/F10a.vis'), with viscosity specified at 257 points 

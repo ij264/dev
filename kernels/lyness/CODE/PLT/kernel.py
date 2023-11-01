@@ -4,7 +4,6 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.colors import Normalize
 
-
 def get_viscosity(filepath: str):
     with open(filepath, "r") as file:
         # Initialize empty lists to store the data
@@ -94,13 +93,12 @@ class Kernel:
         self.radial_data_length = 257
         self.target_dir = target_dir
         self.title = title
-
         self.fig, self.axes = plt.subplots(1, len(self.graph_types) + 1, figsize=(int(8 * len(self.graph_types)), 10))
         self.cmap = LinearSegmentedColormap.from_list('CustomColors', ['blue', 'white', 'red'], N=256)
         self.kernels = np.zeros((len(self.graph_types), self.radial_data_length, len(self.degrees)))
         self.root = root
         self.radial_data, self.kernels = self.kernels_to_2d_numpy_array(self.kernels, self.graph_types, self.degrees)
-        self.viscosity = get_viscosity(os.path.join(root + 'VISC_INPUTS/', 'colli_box.vis'))
+        self.viscosity = get_viscosity(os.path.join(root + self.target_dir, f'{target_dir}.vis'))
 
     def kernels_to_2d_numpy_array(self, kernels, graph_types, degrees):
         for i, graph_type in enumerate(graph_types):
@@ -121,26 +119,35 @@ class Kernel:
         return admittance_kernel
 
     def plot(self):
-        fig, axis = plt.subplots(figsize=(8, 10))
+        fig, axes = plt.subplots(1, 2, figsize=(8, 10))
+        axes[0].plot(self.viscosity, self.radial_data, color='black')
+        axes[0].set_xscale('log')
+        axes[0].set_xlabel('$\mu \,\, (Pa \, s)$')
+        axes[0].set_ylabel('Radius (km)')
+        axes[0].set_ylim(self.radial_data.min(), self.radial_data.max())
         for i, degree in enumerate(self.degrees):
-            plt.plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}')
-        axis.xaxis.tick_top()
-        axis.xaxis.set_label_position('top')
-        axis.set_xlabel(self.graph_types[0])
-        axis.set_ylabel('Radius (km)')
-        axis.legend()
+            axes[1].plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}')
+
+        for i, ax in enumerate(fig.axes):
+            axes[i].xaxis.tick_top()
+            axes[i].xaxis.set_label_position('top')
+
+            axes[i].set_ylabel('Radius (km)')
+            axes[i].legend()
+        axes[0].set_xlabel('$\mu \,\, (Pa \, s)$')
+        axes[1].set_xlabel(self.graph_types[0])
         plt.show()
 
-    def imshow(self, kernels, normalise=True, show_viscosity=True):
-        if kernels.ndim == 2:
-            kernels = np.expand_dims(kernels, axis=0)
+    def imshow(self, filename, normalise=True, show_viscosity=True, save=False):
+        if self.kernels.ndim == 2:
+            kernels = np.expand_dims(self.kernels, axis=0)
 
-        number_of_subplots = kernels.shape[0]
+        number_of_subplots = self.kernels.shape[0]
         if show_viscosity:
             number_of_subplots += 1
         columns = int(np.ceil(np.sqrt(number_of_subplots)))
         rows = int(np.ceil(number_of_subplots / columns))
-        fig, axes = plt.subplots(rows, columns, figsize=(8, 10), squeeze=0)
+        fig, axes = plt.subplots(rows, columns, figsize=(10, 10), squeeze=0)
 
         for i, ax in enumerate(fig.axes):
             if i > number_of_subplots - 1:
@@ -157,16 +164,16 @@ class Kernel:
                 break
             else:
                 if normalise:
-                    vmin = 0
+                    vmin = -1
                     vmax = 1
 
                 else:
-                    vmin = np.min(kernels[i - 1, :, :])
-                    vmax = np.max(kernels[i - 1, :, :])
+                    vmin = np.min(self.kernels[i - 1, :, :])
+                    vmax = np.max(self.kernels[i - 1, :, :])
 
                 norm = Normalize(vmin, vmax)
 
-                im = ax.imshow(kernels[i-1, :, :],
+                im = ax.imshow(self.kernels[i-1, :, :],
                                extent=[np.min(self.degrees), np.max(self.degrees), np.min(self.radial_data),
                                        np.max(self.radial_data)], aspect='auto', cmap='seismic', norm=norm)
                 ax.set_ylim(self.radial_data.min(), self.radial_data.max())
@@ -175,6 +182,8 @@ class Kernel:
                 ax.set_title(self.graph_types[i-1])
                 ax.set_ylabel('Radius (km)')
         plt.tight_layout()
+        if save:
+            plt.savefig(f'{filename}.png', dpi=300)
         plt.show()
 
     def surface_admittance(self):

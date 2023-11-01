@@ -53,10 +53,10 @@ subroutine Wigner3j(w3j, jmin, jmax, j2, j3, m1, m2, m3, exitstatus)
 !   (i.e., ~1.d-10) then this routine is probably usable up to about 160.
 !
 !   These results have also been verified for parameter values less than 100
-!   using a code based on the algorith of de Blanc (1987), which was originally
-!   coded by Olav van Genabeek, and modified by M. Fang (note that this code was
+!   using a CODE based on the algorith of de Blanc (1987), which was originally
+!   coded by Olav van Genabeek, and modified by M. Fang (note that this CODE was
 !   run in quadruple precision, and only calculates one coefficient for each
-!   call. I also have no idea if this code was verified.) Maximum relative
+!   call. I also have no idea if this CODE was verified.) Maximum relative
 !   errors in this case were less than 1.d-8 for a large number of values
 !   (again, only 3j coefficients greater than 1.d-17 were considered here).
 !   

@@ -6,7 +6,7 @@ function iqamax ( n, x, incx )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -108,7 +108,7 @@ subroutine qaxpy ( n, sa, x, incx, y, incy )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -223,7 +223,7 @@ subroutine qgeco ( a, lda, n, ipvt, rcond, z )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -454,7 +454,7 @@ subroutine qgedi ( a, lda, n, ipvt, det, work, job )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -597,7 +597,7 @@ subroutine qgefa ( a, lda, n, ipvt, info )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -723,7 +723,7 @@ subroutine qgesl ( a, lda, n, ipvt, b, job )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -842,7 +842,7 @@ subroutine qscal ( n, sa, x, incx )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -932,7 +932,7 @@ subroutine qswap ( n, x, incx, y, incy )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1051,7 +1051,7 @@ subroutine timestamp ( )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license.
+!    This CODE is distributed under the GNU LGPL license.
 !
 !  Modified:
 !

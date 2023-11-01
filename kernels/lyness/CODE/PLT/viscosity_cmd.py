@@ -56,7 +56,7 @@ def viscosity_interpolate(viscosities, depths, root, filename):
 
     # Ensure the start and end depths are within the range of provided data.
     if depths[0] != 3480 or depths[-1] != 6370:
-        raise ValueError("Start and end depths must be 6370 km and 3400 km respectively.")
+        raise ValueError("Start and end depths must be 6370 km and 3480 km respectively.")
 
     cmb_depth = depths[0]
     surface = depths[-1]
@@ -75,7 +75,7 @@ def viscosity_interpolate(viscosities, depths, root, filename):
     print(f"File written to {root + filename}.")
 
 
-viscosity_depth_input = input("Enter viscosity points in the form (viscosity, depth) separated by commas: ")
+viscosity_depth_input = input("Enter viscosity points in the form (viscosity, depth) separated by commas. Start and end values must be 6370 km and 3480 km: ")
 filename = input("Enter filename: ")
 viscosities, depths = get_viscosities_and_depths(viscosity_depth_input)
 viscosity_interpolate(viscosities, depths, root='proto_visc/', filename=filename)

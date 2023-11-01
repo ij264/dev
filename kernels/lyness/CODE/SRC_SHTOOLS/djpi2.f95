@@ -38,7 +38,7 @@ subroutine djpi2(dj, lmax, exitstatus)
 !
 !       1. Based on routine from Guy Masters (July 16, 1993)
 !       2. Modified by Mark Simons (July 19, 1993)
-!       3. Turned into readable f95 code by Mark Wieczorek (August, 2003).
+!       3. Turned into readable f95 CODE by Mark Wieczorek (August, 2003).
 !
 !   Copyright (c) 2016, SHTOOLS
 !   All rights reserved.
