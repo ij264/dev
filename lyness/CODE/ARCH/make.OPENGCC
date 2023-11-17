@@ -1,0 +1,9 @@
+LK       = mpif90.openmpi
+F90FLAGS = -O3 -ffast-math -J$(MODDIR) -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -lfftw3 -llapack -lblas
+
+FC       = mpif77.openmpi
+FFLAGS   = -O3 -ffast-math -J$(MODDIR) -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -lfftw3 -llapack -lblas 
+
+LFLAGS   = -llapack -L$(LIBDIR) -lSHTOOLS
+
+

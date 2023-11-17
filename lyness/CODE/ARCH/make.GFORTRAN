@@ -1,0 +1,6 @@
+LK       = gfortran
+FC       = gfortran
+FFLAGS   = -fdefault-real-8 -llapack -w -O3 -fPIC -ffast-math -I/Users/fredrichards/bin/SHTOOLS/modules -m64  -L/Users/fredrichards/bin/SHTOOLS/lib -lSHTOOLS -L/usr/local/lib -lfftw3 -lm -lblas
+LFLAGS   = -llapack -L/Users/fredrichards/bin/SHTOOLS/lib -lSHTOOLS
+
+
