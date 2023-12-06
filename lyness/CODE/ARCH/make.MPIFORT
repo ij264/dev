@@ -1,7 +1,0 @@
-LK       = mpifort
-FC       = mpifort
-FFLAGS   = -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -llapack -L/usr/local/lib -lfftw3 -lblas -O3 -m64  
-F90FLAGS = -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -llapack -L/usr/local/lib -lfftw3  -lblas -O3 -m64
-LFLAGS   = 
-
-

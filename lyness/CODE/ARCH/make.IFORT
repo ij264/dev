@@ -1,7 +1,0 @@
-LK       = ifort
-FC       = ifort
-FFLAGS   = -fpp -O2 -module $(MODDIR) -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -lfftw3 -llapack -lblas -O3 -m64  
-F90FLAGS = -fpp -O2 -module $(MODDIR) -I$(MODDIR) -L$(LIBDIR) -lSHTOOLS -lfftw3 -llapack -lblas -O3 -m64
-LFLAGS   = -mkl
-
-
