@@ -120,24 +120,34 @@ class Kernel:
         return admittance_kernel
 
     def plot(self):
-        fig, axes = plt.subplots(1, 2, figsize=(6, 8))
+
+        linestyles = ['-', '--', ':']
+        fig, axes = plt.subplots(1, 2, figsize=(6, 4))
         axes[0].plot(self.viscosity, self.radial_data, color='black')
         axes[0].set_xscale('log')
-        axes[0].set_xlabel('$\eta/\eta_0 \,\, (Pa \, s)$')
+        axes[0].set_xlabel('$\eta/\eta_0$')
         axes[0].set_ylabel('Radius (km)')
         axes[0].set_ylim(self.radial_data.min(), self.radial_data.max())
-        for i, degree in enumerate(self.degrees):
-            axes[1].plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}')
+        axes[0].set_xlim([0.5, 5e4])
+
+        for i, (linestyle, degree) in enumerate(zip(linestyles, self.degrees)):
+            axes[1].plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}', linestyle=linestyle, color='black')
+            axes[1].set_xlim([-0.65, 0.65])
 
         for i, ax in enumerate(fig.axes):
-            axes[i].xaxis.tick_top()
-            axes[i].xaxis.set_label_position('top')
+            ax.xaxis.tick_top()
+            ax.xaxis.set_label_position('top')
+            ax.set_ylim(self.radial_data.min(), self.radial_data.max())
 
-            axes[i].set_ylabel('Radius (km)')
+            ax.set_ylabel('Radius (km)')
+            ax.set_xlabel(self.graph_types[0] + ' Kernel')
+            #
+            # axes[i].invert_xaxis()
 
         plt.legend()
-        axes[1].set_xlabel(self.graph_types[0] + ' Kernel')
+
         plt.tight_layout()
+        plt.savefig(f'figures/{self.target_dir[7:]}_{self.graph_types[0]}.png', dpi=300)
         plt.show()
 
     def imshow(self, filename, normalise=True, show_viscosity=True, save=False):

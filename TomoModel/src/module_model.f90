@@ -654,6 +654,7 @@ contains
 
     character(len=*), intent(in) :: model
     integer(i4b), intent(in) :: io
+
     
     integer(i4b) :: ilayer,ispec,inode,igl,iphi,iphih
     real(dp) :: rr,rrhovs,rt,alpha,lat,long,rvs,rrho
@@ -662,9 +663,12 @@ contains
 
     struct3d = .true.
 
+    write(*,*) 'Writing dvs'
     ! Set S2/40RTS parameters
     mxleny = (lmax+1)**2
+    write(*,*) 'mxleny = ',mxleny
     mxmdll = mxleny*mxparm
+    write(*,*) 'mxmdll = ',mxmdll
     allocate(dvsr(0:lmax,2*lmax+1,mxparm))
     dvsr = 0.0_dp
 
@@ -1226,6 +1230,7 @@ contains
     if(present(io) .and. present(rr) .and. present(rrho) .and. present(rvs)) then
        write(io,*) rr * r_norm , rrho * rho_norm, rvs * vel_norm, & 
             real(dvsvs_lm(1:(lmaxmod+1)**2)),imag(dvsvs_lm(1:(lmaxmod+1)**2))
+
     end if
 
     call fun_from_coefs(dvsvs_lm,dlnvs)

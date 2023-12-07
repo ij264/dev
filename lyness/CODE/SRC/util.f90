@@ -152,6 +152,9 @@ contains
       real(dp) u(nr+1)
       character*20 char1, char2
       character*200 output, input, name_prof
+      character(len=512) :: command
+      integer :: exit_status
+
       if (io .eq. 1) then
          char1 = 'geoid'
       elseif (io .eq. 2) then
@@ -176,7 +179,16 @@ contains
          write(333, '(f17.2,4X, es16.7e3)') r(i)/1000, u(i)
       enddo
       close(333)
+
+
+      ! Build the command to copy the file using the system call
+      command = 'cp ' // name_prof // ' ' // trim(output)//'viscosity_profile.vis'
+
+      ! Execute the copy command using the system call
+      call SYSTEM(command, exit_status)
+
       end subroutine kernel_out
+
 
       subroutine sphcout_3d(coef, char1)
       common /path/ output, input, name_prof
