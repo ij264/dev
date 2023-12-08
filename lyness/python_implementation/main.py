@@ -2,8 +2,6 @@ import numpy as np
 from  scipy import linalg
 
 
-
-# TODO: Check https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/JB089iB07p05987
 def construct_A_matrix(l: int):
 
     L = l * (l + 1)

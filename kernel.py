@@ -68,7 +68,7 @@ class Kernel:
     """
 
     def __init__(self, target_dir, graph_types, degrees, root='../../', title=None):
-        # TODO
+
         self.graph_types_dict = {
             'surftopo': 'Dynamic Surface Topography Kernel',
             'cmbtopo': 'Dynamic CMB Topography Kernel',

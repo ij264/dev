@@ -12,8 +12,9 @@ l_max = 20
 file_path = '../out/output.txt'
 v_s_anomaly_sh_coeffs, radius, ref_density, ref_shear_velocity = read_in.read_in_S20RTS(file_path)
 
+
 # Convert shear wave velocity coefficients to density coefficients.
-density_anomaly_sh_coeffs = process.shear_wave_to_density(v_s_anomaly_sh_coeffs)
+density_anomaly_sh_coeffs = process.shear_wave_to_density(v_s_anomaly_sh_coeffs.real)
 
 # Initialise a pyshtools SHCoeffs class for each radius.
 density_coeffs_clm = np.array([pysh.SHCoeffs.from_zeros(lmax=l_max, kind='real',
@@ -43,7 +44,7 @@ for degree in range(1, l_max + 1):
     kernel = np.interp(radius, radius_kernel, kernel)
 
     integral = process.calculate_observable(observable='surftopo', l=degree, l_max=l_max,
-                                            density_anomaly_sh_lm=density_coeffs_array,
+                                            density_anomaly_sh_lm=density_coeffs_array.real,
                                             kernel=kernel,
                                             radius_arr=radius)
 
@@ -55,53 +56,12 @@ for degree in range(1, l_max + 1):
     # Negative
     clm_DT_array[1][degree] = m_positive
 
+
+# Plot DT
 clm_DT = pysh.SHCoeffs.from_array(clm_DT_array, normalization='ortho')
 clm_DT.csphase = 1
-fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-
-
-latitudes = np.linspace(90, -90, 361)
-longitudes = np.linspace(0, 360, 361)
-
-# Mesh
-longitudes, latitudes = np.meshgrid(longitudes, latitudes)
-grid = clm_DT.expand(lat=latitudes, lon=longitudes)
-grid_data = grid.data
-
-print(grid_data.shape)
-fig = pygmt.Figure()
-
-fig = pygmt.Figure()
-
-fig.grdimage(grid=grid_data, cmap="geo", projection="W10c", frame="ag")
-# fig.basemap(region="g", projection="W15c", frame=True)
-# # Display the shorelines as black lines with 0.5 point thickness
-# fig.coast(shorelines="1.0p,black")
-
-# grid.plotgmt(projection='mollweide',
-#                    cmap='viridis',
-#                    tick_interval=[60, 45],
-#                    minor_tick_interval=[30, 15],
-#                    colorbar='right',
-#                    cb_label='Elevation, km',
-#                    grid=True,
-#                    shading=True)
-
-fig.show()
-
-#
-# ax.set_ylabel(r'Latitude ($^\circ$)')
-# ax.set_xlabel(r'Longitude ($^\circ$)')
-#
-# # Add colorbar
-# cbar = fig.colorbar(im, ax=ax)
-# cbar.set_label('Dynamic Topography (m)')
-# plt.show()
-#
-# fig, ax = clm_DT.plot_spectrum()
-# plt.show()
-
-# grid = pysh.SHGrid.from_array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-
-# Expand the grid
-# expanded_grid = grid.expand()
+grid = clm_DT.expand(grid='DH') / 1.e3
+fig, ax = grid.plot(colorbar='right',
+                    cb_label='Dynamic Topography (km)',
+                    cmap='viridis')
+plt.show()
