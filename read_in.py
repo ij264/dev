@@ -120,3 +120,33 @@ def read_in_S20RTS(file_path: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
     return sh_coeffs, radius, ref_density, ref_shear_velocity
 
 
+def read_in_nc(nc_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    This function takes in a netCDF file and returns the data.
+
+    Parameters
+    ----------
+    nc_file : str
+        The netCDF file to read in.
+
+    Returns
+    -------
+    depths : np.ndarray(dtype=float, ndim=1)
+        The depths that the data is sampled at. Units: km.
+    latitudes : np.ndarray(dtype=float, ndim=1)
+        The latitudes that the data is sampled at. Units: degrees.
+    longitudes : np.ndarray(dtype=float, ndim=1)
+        The longitudes that the data is sampled at. Units: degrees.
+    v : np.ndarray(dtype=float, ndim=3)
+        v is a 3D array of shape (depths, latitudes, longitudes). It can represent several variables.
+    """
+    import netCDF4 as nc
+
+    data = nc.Dataset(nc_file)
+
+    depths = data.variables['depth'][:]
+    latitudes = data.variables['latitude'][:]
+    longitudes = data.variables['longitude'][:]
+    v = data.variables['v'][:]
+
+    return depths, latitudes, longitudes, v

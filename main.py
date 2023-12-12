@@ -46,7 +46,7 @@ if not os.path.exists(f'figures/S20RTS/{visc_src}/{kernel_type}/'):
 # Maximum spherical harmonic degree.
 l_max = 20
 # Read in data
-depths, latitudes, longitudes, dvs = process.read_in_nc("data/S20RTS_dvs.nc")
+depths, latitudes, longitudes, dvs = read_in.read_in_nc("data/S20RTS_dvs.nc")
 
 # Note that longitude is from -180 to 180, so we need to shift it to 0 to 360.
 
