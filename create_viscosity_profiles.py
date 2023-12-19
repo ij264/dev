@@ -37,14 +37,17 @@ def generate_viscosity_profile(depths: np.ndarray,
 
 
 if __name__ == "__main__":
-    depths = np.array([1000, ])
-    delta_log_visc = np.array([1])
+    depths = np.array([670, ])
+    delta_log_visc = np.linspace(0, 3, 2)
 
-    radial_points = np.linspace(constants.surface_boundary, constants.CMB_boundary, constants.number_of_radial_points)
-    viscosity = generate_viscosity_profile(depths=depths, starting_viscosity=0, changes_in_viscosity=delta_log_visc)
+    for visc in delta_log_visc:
+        radial_points = np.linspace(constants.surface_boundary, constants.CMB_boundary, constants.number_of_radial_points)
+        viscosity = generate_viscosity_profile(depths=depths, starting_viscosity=0, changes_in_viscosity=delta_log_visc)
+        plt.plot(viscosity, radial_points)
+        plt.xscale('log')
+        plt.show()
+        file_path = f'lyness/VISC_INPUTS/step_changes/{visc:.2f}.vis'
 
-    file_path = 'lyness/VISC_INPUTS/neg_vis.vis'
-
-    with open(file_path, 'w') as file:
-        for i, (radius, visc) in enumerate(zip(radial_points, viscosity)):
-            file.write(f'{visc}\n')
+        with open(file_path, 'w') as file:
+            for i, (radius, visc) in enumerate(zip(radial_points, viscosity)):
+                file.write(f'{visc}\n')

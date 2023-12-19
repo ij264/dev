@@ -98,7 +98,7 @@ def shear_wave_to_density(dlnv_s: np.ndarray, depths, zero_shallow_mantle: bool 
     delta_density_sh_lm : np.ndarray(dtype=float, ndim=2)
         Array of density anomaly coefficients using a scaling factor.
     """
-
+    # TODO: use actual mean density as a function of depth.
     mean_density = 4500
     drho = 0.1 * dlnv_s * mean_density
 
