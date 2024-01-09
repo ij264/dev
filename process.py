@@ -245,7 +245,7 @@ def plot_power_spectrum(clm: pysh.SHCoeffs, unit='km2', save=False, **kwargs) ->
     ax.plot(np.arange(1, clm.lmax + 1), power[1:], linestyle='--', marker='o', color='k')
     ax.set_xlabel('Degree, $l$')
     ax.set_xlim(1, clm.lmax)
-    ax.set_ylim(1.e-2, 1.e1)
+    ax.set_ylim(0.9e-2, 1.e1)
     ax.set_ylabel('Power [km$^2$]')
     ax.set_yscale('log')
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
