@@ -30,7 +30,7 @@ subroutine CilmPlus(cilm, gridin, lmax, nmax, mass, d, rho, gridtype, w, zero,&
 !                       dimensions (2, lmax+1, lmax+1).
 !           d           The radius that the coefficients are referenced
 !                       to. This parameter corresponds to the degree zero
-!                       term of the data.
+!                       term of the tomographic_models.
 !
 !       OPTIONAL
 !           w           Gauss-Legendre points used in the integrations of

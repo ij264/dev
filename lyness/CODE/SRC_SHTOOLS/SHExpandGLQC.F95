@@ -2,13 +2,13 @@ subroutine SHExpandGLQC(cilm, lmax, gridglq, w, plx, zero, norm, csphase, &
                         lmax_calc, exitstatus)
 !------------------------------------------------------------------------------
 !   
-!   This program will expand a grid of complex data (regulary spaced in
+!   This program will expand a grid of complex tomographic_models (regulary spaced in
 !   longitude, and irregurarly in latitude according to the Guass-Legendre
 !   quadrature points) into complex spherical harmonics by utilizing an FFT of
 !   each latitudinal band, and a Guass-Legendre Quadrature in latitute. Note
 !   that the array PLX (obtained from SHGLQ with CNORM=1) is optional, and
 !   should not be precomputed when memory is an issue (i.e., LMAX>360). It is
-!   implicitly assumed that the gridded data are bandlimited to degree LMAX. If
+!   implicitly assumed that the gridded tomographic_models are bandlimited to degree LMAX. If
 !   the optional parameter LMAX_CALC is specified, the spherical harmonic
 !   coefficients will be calculated only up to and including this degree.
 !
@@ -20,7 +20,7 @@ subroutine SHExpandGLQC(cilm, lmax, gridglq, w, plx, zero, norm, csphase, &
 !   Calling Parameters
 !
 !       IN
-!           gridglq     Gridded data used in the expansion generated
+!           gridglq     Gridded tomographic_models used in the expansion generated
 !                       from a call to MakeGridGLQ, with dimensions
 !                       (LMAX+1, 2*LMAX+1).
 !           lmax        Spherical harmonic bandwidth of the input grid.

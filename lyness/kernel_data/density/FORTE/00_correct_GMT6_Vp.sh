@@ -42,7 +42,7 @@ for model in J362D28 S20A-ISO S20RTS SAW24B16 SB4_L18 TX2002; do
 done
 
 ############################
-# collate all data into single file, one for delta rho / rho, one for delta Vs/ Vs, one for the ratio
+# collate all tomographic_models into single file, one for delta rho / rho, one for delta Vs/ Vs, one for the ratio
 ############################
 
 paste FINAL_J362D28.dat FINAL_S20A-ISO.dat FINAL_S20RTS.dat FINAL_SAW24B16.dat FINAL_SB4_L18.dat FINAL_TX2002.dat | awk '{print $1, $2, $7, $12, $17, $22, $27}' > FINAL_density.dat
@@ -198,7 +198,7 @@ echo "Finished collating data"
 echo ""
 
 ############################
-# Plot data
+# Plot tomographic_models
 ############################
 
 echo ""

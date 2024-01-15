@@ -6,11 +6,11 @@ from matplotlib.colors import Normalize
 
 def get_viscosity(filepath: str):
     with open(filepath, "r") as file:
-        # Initialize empty lists to store the data
+        # Initialize empty lists to store the tomographic_models
 
         # Read and process each line
         visc_data = [float(line) for line in file]
-    # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
+    # convert to 2 dimensional numpy array where rows are kernel tomographic_models and columns are radial tomographic_models
     return np.flip(np.array(visc_data))
 
 
@@ -32,7 +32,7 @@ def find_file_path(dir_to_find, root, degree, graph_type):
 
 def parse_file(path, number_of_columns=2):
     with open(path, "r") as file:
-        # Initialize empty lists to store the data
+        # Initialize empty lists to store the tomographic_models
         radial_data = []
         kernel_data = []
 
@@ -48,10 +48,10 @@ def parse_file(path, number_of_columns=2):
                     radial_data.append(float(columns[0]))
                     kernel_data.append(float(columns[1]))
                 except ValueError:
-                    print("Error: Invalid data format on line:", line)
+                    print("Error: Invalid tomographic_models format on line:", line)
             else:
-                print("Error: Invalid data format on line:", line)
-    # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
+                print("Error: Invalid tomographic_models format on line:", line)
+    # convert to 2 dimensional numpy array where rows are kernel tomographic_models and columns are radial tomographic_models
     return np.array(radial_data), np.flip(np.array(kernel_data))
 
 
@@ -120,7 +120,11 @@ class Kernel:
         return admittance_kernel
 
     def plot(self):
-
+        match self.graph_types[0]:
+            case 'surftopo':
+                lims = [-1.1, 0.1]
+            case 'geoid':
+                lims = [-0.5, 0.5]
         linestyles = ['-', '--', ':']
         fig, axes = plt.subplots(1, 2, figsize=(6, 4))
         axes[0].plot(self.viscosity, self.radial_data, color='black')
@@ -132,7 +136,7 @@ class Kernel:
 
         for i, (linestyle, degree) in enumerate(zip(linestyles, self.degrees)):
             axes[1].plot(np.flip(self.kernels[0, :, i]), self.radial_data, label=f'l = {degree}', linestyle=linestyle, color='black')
-            axes[1].set_xlim([-0.65, 0.65])
+            axes[1].set_xlim(lims)
 
         for i, ax in enumerate(fig.axes):
             ax.xaxis.tick_top()
@@ -206,7 +210,7 @@ class Kernel:
 
     def contour(self):
 
-        # Create a regular grid to interpolate the data.
+        # Create a regular grid to interpolate the tomographic_models.
         x = np.arange(1, 31)
         y = np.arange(1, 258)
         X, Y = np.meshgrid(x, y)

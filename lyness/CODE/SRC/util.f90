@@ -452,7 +452,7 @@ contains
    ! --------------------------------------------------------------------
    ! meanvariance:
    !    this routine reads in an array and computes the mean, variance
-   ! and standard deviation of the data stored in the array. 
+   ! and standard deviation of the tomographic_models stored in the array.
    ! --------------------------------------------------------------------
       use constants, only : qp, dp
       implicit  none

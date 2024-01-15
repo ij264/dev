@@ -2,11 +2,11 @@ subroutine SHExpandLSQ(cilm, d, lat, lon, nmax, lmax, norm, chi2, &
                        csphase, exitstatus)
 !------------------------------------------------------------------------------
 !
-!   This subroutine will expand a set of discrete data points into
+!   This subroutine will expand a set of discrete tomographic_models points into
 !   spherical harmonics using a least squares inversion. When there are
-!   more data points than spherical harmonic coefficients (nmax > (lmax+1)**2)
+!   more tomographic_models points than spherical harmonic coefficients (nmax > (lmax+1)**2)
 !   the solution of the overdetermined system will be determined by least
-!   squares. If there are more coefficients than data points, then the solution
+!   squares. If there are more coefficients than tomographic_models points, then the solution
 !   of the underdetermined system will be determined by minimizing the solution
 !   norm. (See LAPACK DGELS documentation).
 !
@@ -20,12 +20,12 @@ subroutine SHExpandLSQ(cilm, d, lat, lon, nmax, lmax, norm, chi2, &
 !   Calling Parameters
 !
 !       IN
-!           d       Vector of length nmax of the raw data points.
+!           d       Vector of length nmax of the raw tomographic_models points.
 !           lat     Vector of length nmax of the corresponding latitude points
 !                   (in degrees).
 !           lon     Vector of length nmax of the corresponding longitude points
 !                   (in degrees).
-!           nmax    Number of data points.
+!           nmax    Number of tomographic_models points.
 !           lmax    Maximum degree of spherical harmonic expansion.
 !
 !       OUT 

@@ -22,7 +22,7 @@
    !> minimum spherical harmonic degree for computation 
    integer(i4b),  parameter :: l_min = 1
    !> maximum spherical harmonic degree for computation 
-   integer(i4b),  parameter :: l_max_calc = 30
+   integer(i4b),  parameter :: l_max_calc = 40
    !> number of radial layers (with thickness)
    !> with nr+1 number of radial grid points
    integer(i4b),  parameter :: nr = 256 

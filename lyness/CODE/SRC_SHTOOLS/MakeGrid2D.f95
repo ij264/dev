@@ -35,10 +35,10 @@ subroutine MakeGrid2D(grid, cilm, lmax, interval, nlat, nlong, norm, csphase, &
 !           csphase     1: Do not include the phase factor of (-1)^m
 !                       -1: Apply the phase factor of (-1)^m.
 !           f           Flattening of the function. If included, an ellipsoid
-!                       with these parameters will be subtracted from the data.
+!                       with these parameters will be subtracted from the tomographic_models.
 !           a           Semimajor axis of the function. If included,
 !                       an ellipsoid with these parameters will be subtracted
-!                       from the data.
+!                       from the tomographic_models.
 !           north       Maximum latitude to compute, in degrees.
 !           south       Minimum latitude to compute, in degrees.
 !           east        Maximum longitude to compute, in degrees.

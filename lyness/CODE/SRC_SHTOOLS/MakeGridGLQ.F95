@@ -29,7 +29,7 @@ subroutine MakeGridGLQ(gridglq, cilm, lmax, plx, zero, norm, csphase, &
 !                       function.
 !
 !       OUT
-!           gridglq     Gridded data of the spherical harmonic
+!           gridglq     Gridded tomographic_models of the spherical harmonic
 !                       coefficients CILM with dimensions (LMAX+1 , 2*LMAX+1).
 !                       The first index (latitude) corresponds to the
 !                       Gauss points, and the second index corresponds to

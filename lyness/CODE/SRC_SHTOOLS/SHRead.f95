@@ -21,7 +21,7 @@ subroutine SHRead(filename, cilm, lmax, skip, header, error, exitstatus)
 !           lmax        Maximum spherical harmonic degree of cilm.
 !
 !       OPTIONAL
-!           header      Array of the first length(header) data records
+!           header      Array of the first length(header) tomographic_models records
 !                       in the file. Called as header = header, or
 !                       header = header(1:number_of_header_records).
 !           skip        Number of lines to skip

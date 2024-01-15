@@ -4,7 +4,7 @@ subroutine SHRead2(filename, cilm, lmax, gm, r0_pot, error, dot, doystart, &
 !
 !   This program will read the file format of spherical harmonic
 !   coefficients used by the CHAMP/GRACE group into standard arrays for
-!   of Cilm and the error. Not all data for all fields are returned.
+!   of Cilm and the error. Not all tomographic_models for all fields are returned.
 !
 !   Calling Parameters
 !

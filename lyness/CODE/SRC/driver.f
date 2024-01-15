@@ -29,7 +29,7 @@
          stop
       endif
 
-      call getarg(1,output)      ! ouput is the path to output data
+      call getarg(1,output)      ! ouput is the path to output tomographic_models
       call getarg(2,name_prof)   ! viscosity profile
       input='inputs.sph'
       

@@ -10,11 +10,11 @@ import matplotlib.ticker as ticker
 
 def get_viscosity(filepath: str):
     with open(filepath, "r") as file:
-        # Initialize empty lists to store the data
+        # Initialize empty lists to store the tomographic_models
 
         # Read and process each line
         visc_data = [float(line) for line in file]
-    # convert to 2 dimensional numpy array where rows are kernel data and columns are radial data
+    # convert to 2 dimensional numpy array where rows are kernel tomographic_models and columns are radial tomographic_models
     return np.flip(np.array(visc_data))
 
 
@@ -76,6 +76,22 @@ def S20RTS_to_pyshtools(clm: pysh.SHCoeffs, sh_coeffs: np.ndarray) -> pysh.SHCoe
 
     return clm
 
+def interp(arr, length):
+    """
+    Interpolate an array to a new length.
+    Parameters
+    ----------
+    arr
+    length
+
+    Returns
+    -------
+
+    """
+    original_indices = np.arange(len(arr))
+    new_indices = np.linspace(0, len(arr) - 1, length)
+    return np.interp(new_indices, original_indices, arr)
+
 
 def shear_wave_to_density(dlnv_s: np.ndarray, depths, zero_shallow_mantle: bool = True) -> np.ndarray:
     """
@@ -98,13 +114,16 @@ def shear_wave_to_density(dlnv_s: np.ndarray, depths, zero_shallow_mantle: bool 
     delta_density_sh_lm : np.ndarray(dtype=float, ndim=2)
         Array of density anomaly coefficients using a scaling factor.
     """
-    # TODO: use actual mean density as a function of depth.
-    mean_density = 4500
-    drho = 0.1 * dlnv_s * mean_density
+    density_fname = 'density.dat'
+
+    density = np.loadtxt(density_fname, unpack=False)
+    interp_density = interp(density, dlnv_s.shape[0])
+    
+    drho = 0.1 * dlnv_s * interp_density[:, None, None, None]
 
     if zero_shallow_mantle:
         shallow_mantle_index = np.argmax(depths >= 400e3)
-        drho[:shallow_mantle_index, :, :] = 0
+        drho[:shallow_mantle_index, :, :, :] = 0
     return drho
 
 
@@ -166,12 +185,12 @@ def calculate_observable_at_degree(observable: str, l: int, l_max: int, density_
     assert_shape(density_anomaly_sh_lm, (len(radius_arr), 2, l_max + 1, l_max + 1))
     density_anomaly_sh_l = density_anomaly_sh_lm[:, :, l, :]
 
-    # integrand is (radial_points x (2*l_max + 1))
+    # integrand is (radial_points x (2*(l_max + 1)))
     integrand = np.concatenate(
-        (density_anomaly_sh_l[:, 1, :] * kernel.reshape(-1, 1),
-         density_anomaly_sh_l[:, 0, :] * kernel.reshape(-1, 1)),
+        (density_anomaly_sh_l[:, 1, :],
+         density_anomaly_sh_l[:, 0, :]),
         axis=1
-    )
+    ) * kernel.reshape(-1, 1)
 
     # integrate along the radius for each order
     integral = init_factor * scipy.integrate.simpson(integrand, radius_arr, axis=0)
@@ -245,13 +264,19 @@ def plot_power_spectrum(clm: pysh.SHCoeffs, unit='km2', save=False, **kwargs) ->
     ax.plot(np.arange(1, clm.lmax + 1), power[1:], linestyle='--', marker='o', color='k')
     ax.set_xlabel('Degree, $l$')
     ax.set_xlim(1, clm.lmax)
-    ax.set_ylim(0.9e-2, 1.e1)
+    ax.set_ylim(power[1:].min() / 2, power[1:].max() * 2)
     ax.set_ylabel('Power [km$^2$]')
     ax.set_yscale('log')
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
     if save:
-        print('Saving power spectrum plot...')
+        print('\nSaving power spectrum plot...')
         plt.savefig(f"{kwargs['fname']}.png", dpi=300)
         print('Done.')
 
+
+def average_shear_wave(cilms, cutoff_index_lower, cutoff_index_upper):
+    upper_clm = np.mean(cilms[cutoff_index_lower:cutoff_index_upper, :, :, :], axis=0)
+    lower_clm = np.mean(cilms[cutoff_index_upper:, :, :, :], axis=0)
+
+    return upper_clm, lower_clm

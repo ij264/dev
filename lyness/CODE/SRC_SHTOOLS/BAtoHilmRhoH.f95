@@ -4,7 +4,7 @@ subroutine BAtoHilmRhoH(cilm, ba, grid, lmax, nmax, mass, r0, rho, gridtype, &
 !-------------------------------------------------------------------------------
 !
 !   This routine will compute the next estimate of Moho coefficients
-!   given an initial estimate of the moho in a gridded data file. This
+!   given an initial estimate of the moho in a gridded tomographic_models file. This
 !   is simply Equation 18 in Wieczorek and Phillips (1998), modified to
 !   take into account lateral variations in density as from eq. 30 of
 !   Wieczorek (2007). Note that the degree-0 topography must be included

@@ -1,4 +1,4 @@
-# Module to read in kernel and S20RTS data.
+# Module to read in kernel and S20RTS tomographic_models.
 
 import numpy as np
 from typing import Tuple
@@ -27,7 +27,7 @@ def leading_zeros(degree: int) -> str:
 
 def parse_file(path: str, number_of_columns: int = 2) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Parses a file with two columns of data.
+    Parses a file with two columns of tomographic_models.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ def parse_file(path: str, number_of_columns: int = 2) -> Tuple[np.ndarray, np.nd
     """
 
     with open(path, "r") as file:
-        # Initialize empty lists to store the data
+        # Initialize empty lists to store the tomographic_models
         radial_data = []
         kernel_data = []
 
@@ -60,9 +60,9 @@ def parse_file(path: str, number_of_columns: int = 2) -> Tuple[np.ndarray, np.nd
                     radial_data.append(float(columns[0]))
                     kernel_data.append(float(columns[1]))
                 except ValueError:
-                    print("Error: Invalid data format on line:", line)
+                    print("Error: Invalid tomographic_models format on line:", line)
             else:
-                print("Error: Invalid data format on line:", line)
+                print("Error: Invalid tomographic_models format on line:", line)
 
     return np.array(radial_data), np.flip(np.array(kernel_data))
 
@@ -122,7 +122,7 @@ def read_in_S20RTS(file_path: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
 
 def read_in_nc(nc_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    This function takes in a netCDF file and returns the data.
+    This function takes in a netCDF file and returns the tomographic_models.
 
     Parameters
     ----------
@@ -132,11 +132,11 @@ def read_in_nc(nc_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.nda
     Returns
     -------
     depths : np.ndarray(dtype=float, ndim=1)
-        The depths that the data is sampled at. Units: km.
+        The depths that the tomographic_models is sampled at. Units: km.
     latitudes : np.ndarray(dtype=float, ndim=1)
-        The latitudes that the data is sampled at. Units: degrees.
+        The latitudes that the tomographic_models is sampled at. Units: degrees.
     longitudes : np.ndarray(dtype=float, ndim=1)
-        The longitudes that the data is sampled at. Units: degrees.
+        The longitudes that the tomographic_models is sampled at. Units: degrees.
     v : np.ndarray(dtype=float, ndim=3)
         v is a 3D array of shape (depths, latitudes, longitudes). It can represent several variables.
     """
@@ -144,9 +144,9 @@ def read_in_nc(nc_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.nda
 
     data = nc.Dataset(nc_file)
 
-    depths = data.variables['depth'][:]
-    latitudes = data.variables['latitude'][:]
-    longitudes = data.variables['longitude'][:]
-    v = data.variables['v'][:]
+    depths = np.ma.getdata(data.variables['depth'][:], subok=False)
+    latitudes = np.ma.getdata(data.variables['latitude'][:], subok=False)
+    longitudes = np.ma.getdata(data.variables['longitude'][:], subok=False)
+    v = np.ma.getdata(data.variables['v'][:], subok=False)
 
     return depths, latitudes, longitudes, v

@@ -37,7 +37,7 @@ subroutine MakeGridDHC(griddh, n, cilm, lmax, norm, sampling, &
 !                       This determines the spacing of the output grid.
 !
 !       OUT
-!           griddh      Gridded data of the spherical harmonic
+!           griddh      Gridded tomographic_models of the spherical harmonic
 !                       coefficients CILM with dimensions (2*LMAX+2 , 2*LMAX+2).
 !           n           Number of samples in the grid, always even, which is
 !                       2*(LMAX+2).
