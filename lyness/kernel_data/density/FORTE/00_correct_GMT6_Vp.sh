@@ -2,7 +2,7 @@
 
 
 ############################
-# Resample at the same interval as PREM
+# Resample at the same interval as PREM.csv
 ############################
 
 awk '{print $1}' ../PREM.dat > knotfile

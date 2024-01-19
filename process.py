@@ -6,7 +6,7 @@ from typing import Tuple
 import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
+import pandas as pd
 
 def get_viscosity(filepath: str):
     with open(filepath, "r") as file:
@@ -93,7 +93,7 @@ def interp(arr, length):
     return np.interp(new_indices, original_indices, arr)
 
 
-def shear_wave_to_density(dlnv_s: np.ndarray, depths, zero_shallow_mantle: bool = True) -> np.ndarray:
+def shear_wave_to_density(dv_s: np.ndarray, depths, zero_shallow_mantle: bool = True) -> np.ndarray:
     """
     This function takes in shear wave velocity anomaly coefficients and returns density anomaly
     coefficients.
@@ -117,14 +117,24 @@ def shear_wave_to_density(dlnv_s: np.ndarray, depths, zero_shallow_mantle: bool 
     density_fname = 'density.dat'
 
     density = np.loadtxt(density_fname, unpack=False)
-    interp_density = interp(density, dlnv_s.shape[0])
+    interp_density = interp(density, dv_s.shape[0])
     
-    drho = 0.1 * dlnv_s * interp_density[:, None, None, None]
+    # drho = 0.1 * dlnv_s * interp_density[:, None, None, None]
+    v_s_fname = 'PREM.csv'
+    df = pd.read_csv(v_s_fname, delim_whitespace=True)
 
+    v_s = df.iloc[5:-1, 3].to_numpy() * 1.e3
+    PREM_depths = df.iloc[5:-1, 0].to_numpy()
+    drho = np.zeros_like(dv_s)
+    interp_v_s = np.interp(depths, PREM_depths, v_s)
+    for i, density in enumerate(interp_density):
+        # Why does this line give you infinity????
+        drho[i] = 0.1 * density * dv_s[i]/interp_v_s[i]
     if zero_shallow_mantle:
         shallow_mantle_index = np.argmax(depths >= 400e3)
         drho[:shallow_mantle_index, :, :, :] = 0
     return drho
+
 
 
 def calculate_observable_at_degree(observable: str, l: int, l_max: int, density_anomaly_sh_lm: np.ndarray,
@@ -280,3 +290,29 @@ def average_shear_wave(cilms, cutoff_index_lower, cutoff_index_upper):
     lower_clm = np.mean(cilms[cutoff_index_upper:, :, :, :], axis=0)
 
     return upper_clm, lower_clm
+
+def convert_to_sh(file_to_convert_path: str, l_max: int) -> None:
+    coeffs = []
+    with open(file_to_convert_path, 'r') as file:
+        # Read line by line
+        for line in file:
+            coeffs.append(line.split())  # Process each line
+
+    coeffs = np.array(coeffs[1:], dtype='float')
+
+    target_file = f'coefficients/degree_1_to_{l_max}.shcoef'
+
+    with open(target_file, 'w') as file:
+        pass
+
+    # Need to get it in the form l, m, coeffs[0, l, m], coeffs[1, l, m]
+    with open(target_file, 'a') as file:
+        for l in range(l_max + 1):
+            index = l * (l + 1)
+            for counter in range(l + 1):
+                row = np.concatenate((coeffs[index + counter], coeffs[index - counter]), axis=0)
+                if row[1] == 0:
+                    line = f'{row[0]} {row[1]} {row[2]} {0} {row[3]} {0}' + '\n'
+                else:
+                    line = f'{row[0]} {row[1]} {row[6]} {row[2]} {row[7]} {row[3]}' + '\n'
+                file.write(line)

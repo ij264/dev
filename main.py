@@ -30,14 +30,14 @@ readable_kernels = {
 viscosities_location = 'lyness/VISC_INPUTS/'
 visc_srces = os.listdir(viscosities_location)
 # visc_srces = [visc_src[:-4] for visc_src in visc_srces if not '_2' in visc_src]
-visc_srces = [visc_src[:-4] for visc_src in visc_srces if 'C95.vis' in visc_src]
+visc_srces = [visc_src[:-4] for visc_src in visc_srces if not '_2' in visc_src and not 'step_changes' in visc_src]
 # assert isinstance(visc_src, str), "Kernel source must be a string."
 # assert kernel_type in valid_kernels, f"Kernel type must be one of {valid_kernels}."
 
 pygmt.config(COLOR_BACKGROUND="0.6375/0.6375/255", COLOR_FOREGROUND="255/0.6375/0.6375")
 
 # Maximum degrees
-l_maxes = [3]
+l_maxes = [3, 20]
 # l_max = 40
 # Set debugging toggle
 debugging = False
@@ -46,13 +46,14 @@ if debugging:
     location = 'debugging'
 
 # Controls whether the top 400 km is removed or not
-excise_top_layer = True
+excise_top_layer = False
 excised_top_layer_location = 'excised'
 if not excise_top_layer:
     excised_top_layer_location = 'whole_mantle'
 
 tomographic_model_root = 'coefficients/vs_coefficients'
-tomographic_models = [model for model in os.listdir(tomographic_model_root)][:1]
+tomographic_models = [model for model in os.listdir(tomographic_model_root)]
+# tomographic_models = [model for model in os.listdir(tomographic_model_root) if 'S40' in model]
 
 for visc_src in visc_srces:
     # Create kernel if it does not exist.
@@ -189,10 +190,10 @@ for tomographic_model in tomographic_models:
     #                                      east=359
     #                                      )
     # xr_surface_dvs = process.np_to_xr(surface_dvs, lats=latitudes, lons=longitudes)
-
-    # surface_dvs = np.roll(surface_dvs, shift=180, axis=1)
-    # DT_grid /= 1.e3
-
+    #
+    # # surface_dvs = np.roll(surface_dvs, shift=180, axis=1)
+    # # DT_grid /= 1.e3
+    #
     # # Plot dynamic topography with continents
     # xr_surface_dvs = process.np_to_xr(surface_dvs, lats=latitudes, lons=longitudes)
     #
@@ -211,18 +212,71 @@ for tomographic_model in tomographic_models:
     #                      projection='H10c',
     #                      frame=["a"],
     #                      interpolation='b')
-    #         fig.grdcontour(xr_surface_dvs,
-    #                        interval=1.,
-    #                        projection='H10c',
-    #                        frame=True)
+    #         # fig.grdcontour(xr_surface_dvs,
+    #         #                interval=1.,
+    #         #                projection='H10c',
+    #         #                frame=True)
     #         fig.coast(shorelines='1/0.75p,black', resolution='c', area_thresh=1000, projection='H10c',
     #                   region="d")
     #
     #         fig.colorbar(position="+w12c/0.4c+h+o-1c/-1.8c",
     #                      cmap='polar_dvs.cpt',
     #                      frame=["y+l%"])
-    # fig.savefig(f'debugging/testing_tomography_models/{tomographic_model}.png')
+    # fig.savefig(f'debugging/checking_conversion/v_s.png')
 
+    surface_dvs = pysh.expand.MakeGrid2D(cilm=clm_arrays[0],
+                                         interval=1,
+                                         norm=4,
+                                         csphase=-1,
+                                         north=89,
+                                         south=-90,
+                                         west=0,
+                                         east=359
+                                         )
+
+    surface_rho_clm = process.shear_wave_to_density(clm_arrays, depths, zero_shallow_mantle=False)[0]
+
+    # surface_dvs = np.roll(surface_dvs, shift=180, axis=1)
+    # DT_grid /= 1.e3
+    surface_rho = pysh.expand.MakeGrid2D(cilm=surface_rho_clm,
+                                         interval=1,
+                                         norm=4,
+                                         csphase=-1,
+                                         north=89,
+                                         south=-90,
+                                         west=0,
+                                         east=359
+                                         )
+
+    # Plot dynamic topography with continents
+    xr_surface_rho = process.np_to_xr(surface_rho, lats=latitudes, lons=longitudes)
+
+    fig = pygmt.Figure()
+
+    with fig.subplot(
+            nrows=1,
+            ncols=1,
+            figsize=("27.5c", "16")
+    ):
+        # Plot the original digital elevation model in the first panel
+        with fig.set_panel(panel=0):
+            fig.grdimage(xr_surface_rho,
+                         cmap='polar_dvs.cpt',
+                         shading=None,
+                         projection='H10c',
+                         frame=["a"],
+                         interpolation='b')
+            # fig.grdcontour(xr_surface_dvs,
+            #                interval=1.,
+            #                projection='H10c',
+            #                frame=True)
+            fig.coast(shorelines='1/0.75p,black', resolution='c', area_thresh=1000, projection='H10c',
+                      region="d")
+
+            fig.colorbar(position="+w12c/0.4c+h+o-1c/-1.8c",
+                         cmap='polar_dvs.cpt',
+                         frame=["y+l%"])
+    fig.savefig(f'debugging/checking_conversion/rho.png')
 
     for l_max in l_maxes:
         # Read in tomographic_models
@@ -366,8 +420,12 @@ for tomographic_model in tomographic_models:
                                      panel=0)
 
                     with fig.set_panel(panel=1):
+                        if np.any(viscosity <= 0):
+                            proj = 'X4c/6c'
+                        else:
+                            proj = 'X4cl/6c'
                         fig.plot(
-                            projection='X4cl/6c',
+                            projection=proj,
                             x=viscosity,
                             y=viscosity_radius,
                             frame=['yaf+lRadius (km)',
